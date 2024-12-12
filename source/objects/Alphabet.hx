@@ -17,10 +17,16 @@ class Alphabet extends FlxSpriteGroup
 	public var bold:Bool = false;
 	public var letters:Array<AlphaCharacter> = [];
 
-	public var isMenuItem:Bool = false;
-	public var targetY:Int = 0;
-	public var changeX:Bool = true;
-	public var changeY:Bool = true;
+        public var isMenuItem:Bool = false;
+	public var isMenuItemCenter:Bool = false;
+        public var targetY:Int = 0;
+        public var changeX:Bool = true;
+        public var changeY:Bool = true;
+	
+        public var forceX:Float = Math.NEGATIVE_INFINITY;
+        public var yMult:Float = 120;
+        public var xAdd:Float = 0;
+        public var yAdd:Float = 0;
 
 	public var alignment(default, set):Alignment = LEFT;
 	public var scaleX(default, set):Float = 1;
@@ -162,29 +168,42 @@ class Alphabet extends FlxSpriteGroup
 		}
 	}
 
-	override function update(elapsed:Float)
-	{
-		if (isMenuItem)
-		{
-			var lerpVal:Float = Math.exp(-elapsed * 9.6);
-			if(changeX)
-				x = FlxMath.lerp((targetY * distancePerItem.x) + startPosition.x, x, lerpVal);
-			if(changeY)
-				y = FlxMath.lerp((targetY * 1.3 * distancePerItem.y) + startPosition.y, y, lerpVal);
-		}
-		super.update(elapsed);
-	}
+override function update(elapsed:Float)
+    {
+        if (isMenuItem)
+        {
+            var lerpVal:Float = FlxMath.bound(elapsed * 9.6, 0, 1);
 
-	public function snapToPosition()
-	{
-		if (isMenuItem)
-		{
-			if(changeX)
-				x = (targetY * distancePerItem.x) + startPosition.x;
-			if(changeY)
-				y = (targetY * 1.3 * distancePerItem.y) + startPosition.y;
-		}
-	}
+            if(changeX)
+                x = FlxMath.lerp(x, (targetY * distancePerItem.x) + startPosition.x, lerpVal);
+
+            if(changeY)
+                y = FlxMath.lerp(y, (targetY * 1.3 * distancePerItem.y) + startPosition.y, lerpVal);
+        }
+
+        if (isMenuItemCenter)
+        {
+            var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
+
+            var yTarget = (scaledY * yMult) + (FlxG.height * 0.48) + yAdd;
+
+            if (Math.abs(y - yTarget) > 0.1){
+                y = FlxMath.lerp(y, yTarget, 0.1);
+            }
+            else{
+                y = yTarget;
+            }
+
+            if(forceX != Math.NEGATIVE_INFINITY) {  
+                screenCenter(X);
+            }
+            else {
+                screenCenter(X);
+            }
+        }
+        super.update(elapsed);
+    }
+
 
 	private static var Y_PER_ROW:Float = 85;
 
